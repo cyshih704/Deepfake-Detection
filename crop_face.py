@@ -61,7 +61,7 @@ def process(dataset, compression, num_frames, offset, x_expand, y_expand):
 
         sel_indices = np.random.choice(len(frames)-1, num_frames, replace=False)
         for i, idx in enumerate(sel_indices):
-            saved_path = os.path.join(PREPRO_DIR, subpath[dataset], compression, video_name, str(i))
+            saved_path = os.path.join(PREPRO_DIR, subpath[dataset], compression, video_name, str(idx))
 
             face_locations = fr.face_locations(frames[idx])
             if len(face_locations) >= 1:
@@ -75,7 +75,7 @@ def process(dataset, compression, num_frames, offset, x_expand, y_expand):
 
                 if not os.path.exists(saved_path):
                     os.makedirs(saved_path)
-
+#
                 cv2.imwrite(os.path.join(saved_path, '1.png'),
                             cv2.resize(frames[idx, top:bottom, left:right], (256, 300)))
                 cv2.imwrite(os.path.join(saved_path, '2.png'),
@@ -88,5 +88,5 @@ if __name__ == '__main__':
     #process('youtube', 'c40', num_frames=5, offset=1, x_expand=1.5, y_expand=1.8)
 
     for key, val in subpath.items():
-        process(key, 'c23', num_frames=5, offset=1, x_expand=1.5, y_expand=1.8)
-        process(key, 'c40', num_frames=5, offset=1, x_expand=1.5, y_expand=1.8)
+        process(key, 'c23', num_frames=30, offset=1, x_expand=1.5, y_expand=1.8)
+        process(key, 'c40', num_frames=30, offset=1, x_expand=1.5, y_expand=1.8)
