@@ -1,0 +1,4 @@
+download/
+.DS_Store
+__pycache__
+preproc_frames
