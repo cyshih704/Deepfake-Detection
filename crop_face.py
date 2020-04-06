@@ -59,7 +59,9 @@ def process(dataset, compression, num_frames, offset, x_expand, y_expand):
 
         frames = extract_frames(video_path)
 
-        sel_indices = np.random.choice(len(frames)-1, num_frames, replace=False)
+        if len(frames) <= 1:
+            continue
+        sel_indices = np.random.choice(len(frames)-1, min(num_frames, len(frames)-1), replace=False)
         for i, idx in enumerate(sel_indices):
             saved_path = os.path.join(PREPRO_DIR, subpath[dataset], compression, video_name, str(idx))
 

@@ -1,4 +1,4 @@
 import os
 
-DOWNLOAD_DIR = '/Users/cys/Desktop/Deepfake-Detection/download'
-PREPRO_DIR = '/Users/cys/Desktop/Deepfake-Detection/preproc_frames'
+DOWNLOAD_DIR = '/home/tmt/ML_data'
+PREPRO_DIR = '/home/tmt/ML_data/preproc_frames'
