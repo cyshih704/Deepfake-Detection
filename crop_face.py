@@ -16,7 +16,7 @@ subpath = {'youtube': YOUTUBE_SUBPATH,
            'NeuralTextures': NEURAL_SUBPATH,
            'FaceSwap': FACESWAP_SUBPATH,
            'Face2Face': FACE2FACE_SUBPATH,
-           'DeepFakeDetection': DEEPFAKEDETECTION_SUBPATH,
+           #'DeepFakeDetection': DEEPFAKEDETECTION_SUBPATH,
            'Deepfakes': DEEPFAKES_SUBPATH}
 
 
@@ -79,9 +79,9 @@ def process(dataset, compression, num_frames, offset, x_expand, y_expand):
                     os.makedirs(saved_path)
 #
                 cv2.imwrite(os.path.join(saved_path, '1.png'),
-                            cv2.resize(frames[idx, top:bottom, left:right], (256, 300)))
+                            cv2.resize(frames[idx, top:bottom, left:right], (256, 256)))
                 cv2.imwrite(os.path.join(saved_path, '2.png'),
-                            cv2.resize(frames[idx+offset, top:bottom, left:right], (256, 300)))
+                            cv2.resize(frames[idx+offset, top:bottom, left:right], (256, 256)))
 
 
 if __name__ == '__main__':
@@ -90,5 +90,5 @@ if __name__ == '__main__':
     #process('youtube', 'c40', num_frames=5, offset=1, x_expand=1.5, y_expand=1.8)
 
     for key, val in subpath.items():
-        process(key, 'c23', num_frames=30, offset=1, x_expand=1.5, y_expand=1.8)
-        process(key, 'c40', num_frames=30, offset=1, x_expand=1.5, y_expand=1.8)
+        process(key, 'c23', num_frames=100, offset=1, x_expand=1.5, y_expand=1.8)
+        process(key, 'c40', num_frames=100, offset=1, x_expand=1.5, y_expand=1.8)
