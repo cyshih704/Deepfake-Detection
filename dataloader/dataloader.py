@@ -4,6 +4,9 @@ import numpy as np
 import cv2
 import torch
 from dataloader.utils import image_transform, get_image_path
+from skimage import io
+from PIL import Image as pil_image
+
 #from env import PREPRO_DIR
 #PREPRO_DIR = '/home/tmt/ML_data/preproc_frames'
 ALL_DATASETS = ['youtube', 'Face2Face', 'FaceSwap', 'NeuralTextures']
@@ -36,11 +39,14 @@ class DeepfakeDataset(Dataset):
         return len(self.y)
 
     def __getitem__(self, i):
-        first_img = self.transforms(cv2.imread(os.path.join(self.x_path[i], '1.png')))
-        second_img = self.transforms(cv2.imread(os.path.join(self.x_path[i], '2.png')))
-        label = self.y[i]
+        first_img = cv2.imread(os.path.join(self.x_path[i], '1.png'))
+        second_img = cv2.imread(os.path.join(self.x_path[i], '2.png'))
 
-        return first_img, second_img, torch.Tensor(label).int()
+        first_img = self.transforms(pil_image.fromarray(first_img))
+        second_img = self.transforms(pil_image.fromarray(second_img))
+        label = self.y[i]
+        
+        return first_img, second_img, torch.Tensor([label]).int()
 
 if __name__ == '__main__':
     #a = get_image_path('Face2Face', 'c23', 'val')
