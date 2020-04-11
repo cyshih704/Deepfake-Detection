@@ -119,10 +119,11 @@ class FlowNet2(nn.Module):
 
     def forward(self, inputs):
         rgb_mean = inputs.contiguous().view(inputs.size()[:2]+(-1,)).mean(dim=-1).view(inputs.size()[:2] + (1,1,1,))
-        
+
         x = (inputs - rgb_mean) / self.rgb_max
         x1 = x[:,:,0,:,:]
         x2 = x[:,:,1,:,:]
+
         x = torch.cat((x1,x2), dim = 1)
 
         # flownetc

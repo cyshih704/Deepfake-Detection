@@ -4,12 +4,12 @@ from env import PREPRO_DIR
 import json
 
 
-def image_transform():
-    return transforms.Compose([
-            transforms.Resize((256, 256)),
-            transforms.ToTensor(),
-            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
-        ])
+#def image_transform():
+#    return transforms.Compose([
+#            transforms.Resize((256, 256)),
+#            transforms.ToTensor(),
+#            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+#        ])
 
 def get_image_path(dataset, compression, split):
     with open(os.path.join('dataloader', 'splits', '{}.json'.format(split))) as f:

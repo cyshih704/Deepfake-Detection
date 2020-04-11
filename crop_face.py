@@ -90,5 +90,6 @@ if __name__ == '__main__':
     #process('youtube', 'c40', num_frames=5, offset=1, x_expand=1.5, y_expand=1.8)
 
     for key, val in subpath.items():
-        process(key, 'c23', num_frames=100, offset=1, x_expand=1.5, y_expand=1.8)
-        process(key, 'c40', num_frames=100, offset=1, x_expand=1.5, y_expand=1.8)
+        if key == 'Deepfakes':
+            process(key, 'c23', num_frames=100, offset=1, x_expand=1.5, y_expand=1.8)
+            process(key, 'c40', num_frames=100, offset=1, x_expand=1.5, y_expand=1.8)

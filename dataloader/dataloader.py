@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import cv2
 import torch
-from dataloader.utils import image_transform, get_image_path
+from dataloader.utils import get_image_path
 from skimage import io
 from PIL import Image as pil_image
 
@@ -23,7 +23,7 @@ class DeepfakeDataset(Dataset):
     def __init__(self, split, dataset):
         self.x_path = []
         self.y = []
-        self.transforms = image_transform()
+        #self.transforms = image_transform()
         if dataset == 'all':
             for dataset in ALL_DATASETS:
                 img_path = get_image_path(dataset, 'c23', split)
@@ -39,14 +39,16 @@ class DeepfakeDataset(Dataset):
         return len(self.y)
 
     def __getitem__(self, i):
-        first_img = cv2.imread(os.path.join(self.x_path[i], '1.png'))
-        second_img = cv2.imread(os.path.join(self.x_path[i], '2.png'))
 
-        first_img = self.transforms(pil_image.fromarray(first_img))
-        second_img = self.transforms(pil_image.fromarray(second_img))
+        first_img = cv2.cvtColor(cv2.imread(os.path.join(self.x_path[i], '1.png')), cv2.COLOR_BGR2RGB)
+        second_img = cv2.cvtColor(cv2.imread(os.path.join(self.x_path[i], '2.png')), cv2.COLOR_BGR2RGB)
+
+        first_img = cv2.resize(first_img, (256, 256)).transpose(2, 0, 1) # c, h, w
+        second_img = cv2.resize(second_img, (256, 256)).transpose(2, 0, 1) # c, h, w
+
         label = self.y[i]
         
-        return first_img, second_img, torch.Tensor([label]).int()
+        return torch.FloatTensor(first_img), torch.FloatTensor(second_img), torch.Tensor([label]).int()
 
 if __name__ == '__main__':
     #a = get_image_path('Face2Face', 'c23', 'val')
