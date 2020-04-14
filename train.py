@@ -3,8 +3,12 @@ import argparse
 from dataloader.dataloader import get_loader
 from tqdm import tqdm
 import torch
-import models
+import torch.nn as nn
+import torch.optim as optim
+from models import flownet_models
+from models.classifier import FlowClassifier
 #from models import FlowNet2
+import pretrainedmodels
 
 parser = argparse.ArgumentParser(description='Depth Completion')
 parser.add_argument('-b', '--batch_size', type=int, default=16, help='batch size')
@@ -20,50 +24,83 @@ args = parser.parse_args()
 
 DEVICE = 'cuda' if torch.cuda.is_available() and not args.using_cpu else 'cpu'
 
-def train_val(model, loader, epoch, device):
+
+def train_val(model, clf, criterion, optimizer, loader, epoch, device):
     #device = model.device()
-    #print(device)
     for phase in ['train', 'val']:
         total_loss = 0
-        total_pic = 0
+        total_correct = 0
+        total_data = 0
+
         data_loader = loader[phase]
         pbar = tqdm(iter(data_loader))
 
         if phase == 'train':
-            model.train()
+            #model.train()
+            clf.train()
         else:
-            model.eval()
+            #model.eval()
+            clf.eval()
 
-        for num_batch, (first_img, second_img, label) in enumerate(pbar):
-            first_img, second_img, label = first_img.to(device), second_img.to(device), label.to(device)
+        for num_batch, (first_img, second_img, labels) in enumerate(pbar):
+            first_img, second_img, labels = first_img.to(device), second_img.to(device), labels.to(device)
             inputs = torch.cat((first_img.unsqueeze(2), second_img.unsqueeze(2)), dim=2)
 
             if phase == 'train':
-                flow = model(inputs) # batch, 2, h, w
+                #flow = model(inputs) # batch, 2, h, w
+                flow = first_img # batch, 2, h, w
+                preds = clf(flow)
             else:
                 with torch.no_grad():
-                    pass
-
+                    #flow = model(inputs) # batch, 2, h, w
+                    flow = first_img # batch, 2, h, w
+                    preds = clf(flow)
+        
             if phase == 'train':
-                loss.backward()
+                loss = criterion(preds, labels)
+
+                #weight = torch.ones_like(labels)
+                #weight[labels == 1.0] = 4.0
+                #weighted_loss = torch.mean(loss * weight)
+                weighted_loss = loss
+        
+                weighted_loss.backward()
                 optimizer.step()
                 optimizer.zero_grad()
 
-        pbar.set_description('[{}] Epoch: {}; loss: {:.4f}'.format(phase.upper(), epoch+1, total_loss/total_pic))
+
+            _, pred_class = torch.max(preds, dim=1, keepdims=True)
+            num_correct = torch.sum((pred_class == labels)).item()
+
+            total_correct += num_correct
+            total_loss += weighted_loss
+            total_data += first_img.size(0)
+
+            pbar.set_description('[{}] Epoch: {}; loss: {:.4f}, acc: {:.2f}%'.format(phase.upper(), epoch+1, total_loss/total_data,
+                            total_correct/total_data*100))
 
 
 def main():
-    train_loader = get_loader('test', batch_size=8, shuffle=True, num_workers=8)
-    val_loader = get_loader('val', batch_size=8, shuffle=False, num_workers=8)
+    clf = pretrainedmodels.__dict__['xception'](num_classes=1000, pretrained='imagenet')
+    del clf.last_linear
+    clf.last_linear = nn.Sequential(nn.Linear(2048, 1), nn.Sigmoid())
+    clf = clf.to(DEVICE)
+
+    train_loader = get_loader('train', batch_size=2, shuffle=True, num_workers=8, num_data=7000)
+    val_loader = get_loader('val', batch_size=2, shuffle=False, num_workers=8, num_data=500)
     loader = {'train': train_loader, 'val': val_loader}
+    #state_dict = torch.load('saved_model/FlowNet2.tar')['state_dict']
+    #model = flownet_models.FlowNet2(args).to(DEVICE)
+    #model.load_state_dict(state_dict)
+    #model.eval()
+    model = 1
 
-    state_dict = torch.load('saved_model/FlowNet2.tar')['state_dict']
-    model = models.FlowNet2(args).to(DEVICE)
-    model.load_state_dict(state_dict)
-    model.eval()
+    #clf = FlowClassifier(3).to(DEVICE)
+    criterion = nn.BCELoss(reduction='mean')
+    optimizer = optim.Adam(clf.parameters(), lr=0.001)
 
-    for epoch in range(1):
-        train_val(model, loader, epoch, DEVICE)
+    for epoch in range(100):
+        train_val(model, clf, criterion, optimizer, loader, epoch, DEVICE)
 
 if __name__ == '__main__':
     main()
