@@ -15,7 +15,13 @@ python3 download/download-Faceforensics.py ./download -d all -c c40 -t videos
 bash install.sh
 ```
 
-## Data Preprocessing
+## Usage
+Set the path in **env.py**
+```
+DOWNLOAD_DIR: have manipulated_suquences/ and original_sequences/
+PREPRO_DIR: empty folder, the folder to save proprocessed data
+```
+### Data Preprocessing
 - Sample 100 pairs of consecutive frames from each video
 - Crop face region according to the first frame
 ```
