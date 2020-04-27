@@ -13,11 +13,12 @@ DEEPFAKEDETECTION_SUBPATH = os.path.join('manipulated_sequences', 'DeepFakeDetec
 DEEPFAKES_SUBPATH = os.path.join('manipulated_sequences', 'Deepfakes')
 
 subpath = {'youtube': YOUTUBE_SUBPATH,
-           'NeuralTextures': NEURAL_SUBPATH,
-           'FaceSwap': FACESWAP_SUBPATH,
-           'Face2Face': FACE2FACE_SUBPATH,
+           #'NeuralTextures': NEURAL_SUBPATH,
+           #'FaceSwap': FACESWAP_SUBPATH,
+           'Face2Face': FACE2FACE_SUBPATH
            #'DeepFakeDetection': DEEPFAKEDETECTION_SUBPATH,
-           'Deepfakes': DEEPFAKES_SUBPATH}
+           #'Deepfakes': DEEPFAKES_SUBPATH}
+}
 
 
 def extract_frames(video_path):
@@ -91,5 +92,5 @@ if __name__ == '__main__':
 
     for key, val in subpath.items():
         if key == 'Deepfakes':
-            process(key, 'c23', num_frames=100, offset=1, x_expand=1.5, y_expand=1.8)
-            process(key, 'c40', num_frames=100, offset=1, x_expand=1.5, y_expand=1.8)
+            process(key, 'c23', num_frames=20, offset=1, x_expand=1.5, y_expand=1.8)
+            #process(key, 'c40', num_frames=20, offset=1, x_expand=1.5, y_expand=1.8)
