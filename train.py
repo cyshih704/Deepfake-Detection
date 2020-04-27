@@ -7,8 +7,11 @@ import torch.nn as nn
 import torch.optim as optim
 from models import flownet_models
 from models.classifier import FlowClassifier
-#from models import FlowNet2
-import pretrainedmodels
+from models.resnet import resnet18
+from models.vgg import vgg11_bn
+from tb_writer import TensorboardWriter
+import os
+
 
 parser = argparse.ArgumentParser(description='Depth Completion')
 parser.add_argument('-b', '--batch_size', type=int, default=16, help='batch size')
@@ -25,8 +28,9 @@ args = parser.parse_args()
 DEVICE = 'cuda' if torch.cuda.is_available() and not args.using_cpu else 'cpu'
 
 
-def train_val(model, clf, criterion, optimizer, loader, epoch, device):
-    #device = model.device()
+def train_val(clf, criterion, optimizer, loader, epoch, device):
+    train_acc, val_acc = 0, 0
+    train_loss, val_loss = 0, 0
     for phase in ['train', 'val']:
         total_loss = 0
         total_correct = 0
@@ -42,65 +46,106 @@ def train_val(model, clf, criterion, optimizer, loader, epoch, device):
             #model.eval()
             clf.eval()
 
-        for num_batch, (first_img, second_img, labels) in enumerate(pbar):
-            first_img, second_img, labels = first_img.to(device), second_img.to(device), labels.to(device)
-            inputs = torch.cat((first_img.unsqueeze(2), second_img.unsqueeze(2)), dim=2)
-
+        for num_batch, (img, labels) in enumerate(pbar):
+            #first_img, second_img = first_img.to(device), second_img.to(device)
+            #farnback_img, flownet_img = farnback_img.to(device), flownet_img.to(device)
+            #farnback, flownet = farnback.to(device), flownet.to(device)
+            img = img.to(device)
+            labels = labels.to(device)
             if phase == 'train':
-                #flow = model(inputs) # batch, 2, h, w
-                flow = first_img # batch, 2, h, w
-                preds = clf(flow)
+                preds = clf(img)
             else:
                 with torch.no_grad():
-                    #flow = model(inputs) # batch, 2, h, w
-                    flow = first_img # batch, 2, h, w
-                    preds = clf(flow)
-        
-            if phase == 'train':
-                loss = criterion(preds, labels)
-
-                #weight = torch.ones_like(labels)
-                #weight[labels == 1.0] = 4.0
-                #weighted_loss = torch.mean(loss * weight)
-                weighted_loss = loss
-        
-                weighted_loss.backward()
-                optimizer.step()
-                optimizer.zero_grad()
+                    preds = clf(img)
 
 
-            _, pred_class = torch.max(preds, dim=1, keepdims=True)
+            pred_class = (preds > 0.5).int()
             num_correct = torch.sum((pred_class == labels)).item()
 
-            total_correct += num_correct
-            total_loss += weighted_loss
-            total_data += first_img.size(0)
+            loss = criterion(preds, labels)        
 
-            pbar.set_description('[{}] Epoch: {}; loss: {:.4f}, acc: {:.2f}%'.format(phase.upper(), epoch+1, total_loss/total_data,
+
+            total_correct += num_correct
+            total_loss += loss.item()
+            total_data += img.size(0)
+
+
+            if phase == 'train':
+                loss.backward()
+                optimizer.step()
+                optimizer.zero_grad()
+                train_acc = total_correct/total_data*100
+                train_loss = total_loss/total_data
+            else:
+                val_acc = total_correct/total_data*100
+                val_loss = total_loss/total_data
+
+            #_, pred_class = torch.max(preds, dim=1, keepdims=True)
+
+
+            pbar.set_description('[{}] Epoch: {}; loss: {:.4f}, acc: {:.2f}%'.format(phase.upper(), epoch, total_loss/total_data,
                             total_correct/total_data*100))
+    return train_loss, val_loss, train_acc, val_acc
+
+
+class EarlyStop():
+    """Early stop training if validation loss didn't improve for a long time"""
+    def __init__(self, patience, mode = 'min'):
+        self.patience = patience
+        self.mode = mode
+
+        self.best = float('inf') if mode == 'min' else 0
+        self.cur_patience = 0
+
+    def stop(self, loss, model, epoch, saved_model_path):
+        update_best = loss < self.best if self.mode == 'min' else loss > self.best
+
+        if update_best:
+            self.best = loss
+            self.cur_patience = 0
+
+            torch.save({'val_loss': loss, \
+                        'state_dict': model.state_dict(), \
+                        'epoch': epoch}, saved_model_path+'.tar')
+            print('SAVE MODEL to {}'.format(saved_model_path))
+        else:
+            self.cur_patience += 1
+            if self.patience == self.cur_patience:
+                return True
+        
+        return False
+
+
+
 
 
 def main():
-    clf = pretrainedmodels.__dict__['xception'](num_classes=1000, pretrained='imagenet')
-    del clf.last_linear
-    clf.last_linear = nn.Sequential(nn.Linear(2048, 1), nn.Sigmoid())
-    clf = clf.to(DEVICE)
 
-    train_loader = get_loader('train', batch_size=2, shuffle=True, num_workers=8, num_data=7000)
-    val_loader = get_loader('val', batch_size=2, shuffle=False, num_workers=8, num_data=500)
-    loader = {'train': train_loader, 'val': val_loader}
-    #state_dict = torch.load('saved_model/FlowNet2.tar')['state_dict']
-    #model = flownet_models.FlowNet2(args).to(DEVICE)
-    #model.load_state_dict(state_dict)
-    #model.eval()
-    model = 1
+    tensorboard_path = 'runs/{}'.format(args.saved_model_name)
+    tb_writer = TensorboardWriter(tensorboard_path)
 
-    #clf = FlowClassifier(3).to(DEVICE)
+    early_stop = EarlyStop(patience=5, mode='max')
+
+
+    train_loader = get_loader('train', batch_size=32, shuffle=True, num_data=-1)
+    val_loader = get_loader('val', batch_size=32, shuffle=False, num_data=-1)
+    loader = dict(train=train_loader, val=val_loader)
+
+    #clf = resnet18(pretrained=False, num_classes=1, in_channels=2).to(DEVICE)
+    clf = vgg11_bn(pretrained=False, num_classes=1).to(DEVICE)
     criterion = nn.BCELoss(reduction='mean')
-    optimizer = optim.Adam(clf.parameters(), lr=0.001)
+    optimizer = optim.Adam(clf.parameters(), lr=1e-4)
 
-    for epoch in range(100):
-        train_val(model, clf, criterion, optimizer, loader, epoch, DEVICE)
+    for epoch in range(1, 100):
+        train_loss, val_loss, train_acc, val_acc = train_val(clf, criterion, optimizer, loader, epoch, DEVICE)
+        tb_writer.tensorboard_write(epoch, train_loss, val_loss, train_acc, val_acc)
+
+        saved_model_path = os.path.join("saved_model", "{}".format(args.saved_model_name))
+        if early_stop.stop(val_acc, clf, epoch, saved_model_path):
+            break
+
+
+    tb_writer.close()
 
 if __name__ == '__main__':
     main()

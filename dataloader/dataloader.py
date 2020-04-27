@@ -14,9 +14,9 @@ ALL_DATASETS = ['youtube', 'Face2Face']
 FAKE_DATASETS = ['Face2Face', 'FaceSwap', 'NeuralTextures', 'Deepfakes']
 # split, batch_size, shuffle, num_workers=8
 
-def get_loader(split, batch_size, shuffle, num_data, num_workers=8):
+def get_loader(split, batch_size, shuffle, num_data):
     dataset = DeepfakeDataset(split, 'all', num_data=num_data)
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)#, num_workers=num_workers)
     return loader
     
 class DeepfakeDataset(Dataset):
@@ -55,17 +55,38 @@ class DeepfakeDataset(Dataset):
     def __len__(self):
         return len(self.y)
 
+    def _read_image_to_rgb(self, img_path):
+        """Return numpy array with shape (c, h, w), where c is rgb."""
+        img = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
+        img = cv2.resize(img, (256, 256)).transpose(2, 0, 1) # c, h, w
+        return img
+
     def __getitem__(self, i):
+        """first_img = self._read_image_to_rgb(os.path.join(self.x_path[i], '1.png'))
+        second_img = self._read_image_to_rgb(os.path.join(self.x_path[i], '2.png'))
 
-        first_img = cv2.cvtColor(cv2.imread(os.path.join(self.x_path[i], '1.png')), cv2.COLOR_BGR2RGB)
-        second_img = cv2.cvtColor(cv2.imread(os.path.join(self.x_path[i], '2.png')), cv2.COLOR_BGR2RGB)
+        farnback_img = self._read_image_to_rgb(os.path.join(self.x_path[i], 'farnback_flow.png'))
+        flownet_img = self._read_image_to_rgb(os.path.join(self.x_path[i], 'flownet2_flow.png'))
 
-        first_img = cv2.resize(first_img, (256, 256)).transpose(2, 0, 1) # c, h, w
-        second_img = cv2.resize(second_img, (256, 256)).transpose(2, 0, 1) # c, h, w
+        farnback = np.load(os.path.join(self.x_path[i], 'farnback.npy'))
+        flownet = np.load(os.path.join(self.x_path[i], 'flownet2.npy'))
 
         label = self.y[i]
         
-        return torch.FloatTensor(first_img), torch.FloatTensor(second_img), torch.Tensor([label]).float()
+        return torch.FloatTensor(first_img), torch.FloatTensor(second_img), \
+               torch.FloatTensor(farnback_img), torch.FloatTensor(flownet_img),\
+               torch.FloatTensor(farnback), torch.FloatTensor(flownet),\
+               torch.Tensor([label]).float()"""
+        #farnback = np.load(os.path.join(self.x_path[i], 'farnback.npy'))
+        #flownet = np.load(os.path.join(self.x_path[i], 'flownet2.npy'))
+        #spynet = np.load(os.path.join(self.x_path[i], 'spynet.npy'))
+        #pwc = np.load(os.path.join(self.x_path[i], 'pwc.npy'))
+        first_img = self._read_image_to_rgb(os.path.join(self.x_path[i], '1.png'))
+        #second_img = self._read_image_to_rgb(os.path.join(self.x_path[i], '2.png'))
+        label = self.y[i]
+
+        return torch.FloatTensor(first_img), torch.Tensor([label]).float()
+        #return torch.FloatTensor(first_img), torch.FloatTensor(farnback), torch.Tensor([label]).float()
 
 if __name__ == '__main__':
     #a = get_image_path('Face2Face', 'c23', 'val')
