@@ -50,6 +50,7 @@ python3 save_seq_flow.py
 - Classifier: Vgg11 or Resnet18
 - Input: Types of input is necessary to be set in **dataloader/dataloader.py** manually
 
+#### train for CNN model
 ```
 python3 train.py -b <BATCH_SIZE> -e <EPOCH> -m <SAVED_MODEL_NAME> -l <MODEL_PATH> -n <NUM_DATA> -cpu
     -b <BATCH_SIZE>
@@ -65,12 +66,38 @@ python3 train.py -b <BATCH_SIZE> -e <EPOCH> -m <SAVED_MODEL_NAME> -l <MODEL_PATH
     -cpu
         if you want to use CPU to train
 ```
+#### train for RNN model
+```
+python3 train.py -b <BATCH_SIZE> -e <EPOCH> -m <SAVED_MODEL_NAME> -l <MODEL_PATH> -n <NUM_DATA> -cpu
+    -b <BATCH_SIZE>
+        batch size used for training and validation
+    -e <EPOCH>
+        the number of epoch for training and validation
+    -m <SAVED_MODEL_NAME>
+        the model name (be saved in SAVED_MODEL_PATH)
+    -l <MODEL_PATH>
+        specified the model path if you want to load previous model
+    -n <NUM_DATA>
+        the number of data used for training. (set -1 if you want to use all the training data (85898))
+    -cpu
+        if you want to use CPU to train
+    -f
+        finetune pretrained CNN model or not
+```
+
 ### Test
 - Evaluate the model on test split of Faceforensics++
+#### test for CNN model
 ```
 python3 test.py -l <MODEL_PATH> -cpu
-    -n <NUM_DATA>
-        the number of data used for testing. (set -1 if you want to use all the testing data (1000))
+    -l <MODEL_PATH>
+        the path of loaded model
+    -cpu   
+        if you want to use CPU to test
+```
+#### test for RNN model
+```
+python3 test_seq.py -l <MODEL_PATH> -cpu
     -l <MODEL_PATH>
         the path of loaded model
     -cpu   
