@@ -7,14 +7,12 @@ from dataloader.utils import get_image_path
 from skimage import io
 from PIL import Image as pil_image
 
-#from env import PREPRO_DIR
-#PREPRO_DIR = '/home/tmt/ML_data/preproc_frames'
 
 ALL_DATASETS = ['youtube', 'Face2Face']
-FAKE_DATASETS = ['Face2Face', 'FaceSwap', 'NeuralTextures', 'Deepfakes']
-# split, batch_size, shuffle, num_workers=8
+#FAKE_DATASETS = ['Face2Face', 'FaceSwap', 'NeuralTextures', 'Deepfakes']
 
 def get_loader(split, batch_size, shuffle, num_data):
+    # get dataloader
     dataset = DeepfakeDataset(split, 'all', num_data=num_data)
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)#, num_workers=num_workers)
     return loader
@@ -62,35 +60,13 @@ class DeepfakeDataset(Dataset):
         return img
 
     def __getitem__(self, i):
-        """first_img = self._read_image_to_rgb(os.path.join(self.x_path[i], '1.png'))
-        second_img = self._read_image_to_rgb(os.path.join(self.x_path[i], '2.png'))
-
-        farnback_img = self._read_image_to_rgb(os.path.join(self.x_path[i], 'farnback_flow.png'))
-        flownet_img = self._read_image_to_rgb(os.path.join(self.x_path[i], 'flownet2_flow.png'))
-
-        farnback = np.load(os.path.join(self.x_path[i], 'farnback.npy'))
-        flownet = np.load(os.path.join(self.x_path[i], 'flownet2.npy'))
-
-        label = self.y[i]
-        
-        return torch.FloatTensor(first_img), torch.FloatTensor(second_img), \
-               torch.FloatTensor(farnback_img), torch.FloatTensor(flownet_img),\
-               torch.FloatTensor(farnback), torch.FloatTensor(flownet),\
-               torch.Tensor([label]).float()"""
         #farnback = np.load(os.path.join(self.x_path[i], 'farnback.npy'))
         #flownet = np.load(os.path.join(self.x_path[i], 'flownet2.npy'))
         #spynet = np.load(os.path.join(self.x_path[i], 'spynet.npy'))
         #pwc = np.load(os.path.join(self.x_path[i], 'pwc.npy'))
-        first_img = self._read_image_to_rgb(os.path.join(self.x_path[i], '1.png'))
+        #first_img = self._read_image_to_rgb(os.path.join(self.x_path[i], '1.png'))
         #second_img = self._read_image_to_rgb(os.path.join(self.x_path[i], '2.png'))
+        farnback_img = self._read_image_to_rgb(os.path.join(self.x_path[i], 'farnback_flow.png'))
         label = self.y[i]
 
-        return torch.FloatTensor(first_img), torch.Tensor([label]).float()
-        #return torch.FloatTensor(first_img), torch.FloatTensor(farnback), torch.Tensor([label]).float()
-
-if __name__ == '__main__':
-    #a = get_image_path('Face2Face', 'c23', 'val')
-    dataset = DeepfakeDataset('train', 'youtube')
-    loader = DataLoader(dataset, batch_size=32)
-    for img1, img2, label in loader:
-        print(img1.size(), img2.size(), label)
+        return torch.FloatTensor(farnback_img), torch.Tensor([label]).float()
