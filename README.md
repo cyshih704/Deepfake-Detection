@@ -26,7 +26,8 @@ PREPRO_DIR: empty folder, the folder to save proprocessed data
 ```
 
 ### Data Preprocessing
-- Randomly sample 20 pairs of consecutive frames from each video
+- Randomly sample 20 pairs of consecutive frames from each video (for CNN models)
+- Get first 50 pairs of consecutive frames from each video (for RNN models)
 - Crop face region according to the first frame
 ```
 python3 crop_face.py
