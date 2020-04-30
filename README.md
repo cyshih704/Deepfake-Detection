@@ -26,7 +26,8 @@ PREPRO_DIR: empty folder, the folder to save proprocessed data
 ```
 
 ### Data Preprocessing
-- Randomly sample 20 pairs of consecutive frames from each video
+- Randomly sample 20 pairs of consecutive frames from each video (for CNN models)
+- Get first 50 pairs of consecutive frames from each video (for RNN models)
 - Crop face region according to the first frame
 ```
 python3 crop_face.py
@@ -43,6 +44,8 @@ python3 save_flow.py
 ### Train
 - Train the CNN model on randomly sampled optical flow in the videos
 - Classifier: Vgg11 or Resnet18
+- Input: Types of input is necessary to be set in **dataloader/dataloader.py** manually
+
 ```
 python3 train.py -b <BATCH_SIZE> -e <EPOCH> -m <SAVED_MODEL_NAME> -l <MODEL_PATH> -n <NUM_DATA> -cpu
     -b <BATCH_SIZE>
