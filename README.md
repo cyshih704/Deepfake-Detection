@@ -40,6 +40,10 @@ python3 crop_face.py
 ```
 python3 save_flow.py
 ```
+- Save consecutive flow into a file (used for RNN model)
+```
+python3 save_seq_flow.py
+```
 
 ### Train
 - Train the CNN model on randomly sampled optical flow in the videos
