@@ -40,7 +40,7 @@ python3 crop_face.py
 python3 save_flow.py
 ```
 
-### Training
+### Train
 - Train the CNN model on randomly sampled optical flow in the videos
 - Classifier: Vgg11 or Resnet18
 ```
@@ -58,5 +58,14 @@ python3 train.py -b <BATCH_SIZE> -e <EPOCH> -m <SAVED_MODEL_NAME> -l <MODEL_PATH
     -cpu
         if you want to use CPU to train
 ```
-
-
+### Test
+- Evaluate the model on test split of Faceforensics++
+```
+python3 test.py -l <MODEL_PATH> -cpu
+    -n <NUM_DATA>
+        the number of data used for testing. (set -1 if you want to use all the testing data (1000))
+    -l <MODEL_PATH>
+        the path of loaded model
+    -cpu   
+        if you want to use CPU to test
+```
