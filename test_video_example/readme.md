@@ -9,7 +9,7 @@ pip3 install -r requirements.txt
 ```
 
 ## Usage
-- Download **encoder.tar** and **decoder.tar** to the **saved_model/**
+- Download **encoder.tar** and **decoder.tar** to **saved_model/**
   - The model link is at **saved_model/download_link.txt**
 - Run the script to test **real.mp4** and **fake.mp4**
  ```
