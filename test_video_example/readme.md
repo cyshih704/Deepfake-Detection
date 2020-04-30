@@ -1,4 +1,4 @@
-This is the code to test on a video, the training code can be found here https://github.com/ChingYenShih/Deepfake-Detection
+This is the code to test if a video is real, the training code can be found here https://github.com/ChingYenShih/Deepfake-Detection
 ## Usage
 - Download **encoder.tar** and **decoder.tar** to the **saved_model/**
   - The model link is at **saved_model/download_link.txt**
