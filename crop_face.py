@@ -1,6 +1,6 @@
 import os
 import cv2
-from env import PREPRO_DIR, DOWNLOAD_DIR
+from env import PREPRO_DIR, DOWNLOAD_DIR, SEQ_DIR
 import numpy as np
 import face_recognition as fr
 from tqdm import tqdm
@@ -43,7 +43,7 @@ def extract_frames(video_path):
     return buf
 
 
-def process(dataset, compression, num_frames, offset, x_expand, y_expand):
+def process(dataset, compression, num_frames, offset, x_expand, y_expand, continueous):
     """Save consecutive frames.
     
     Params:
@@ -54,7 +54,7 @@ def process(dataset, compression, num_frames, offset, x_expand, y_expand):
     x_expand: float, expand the cropping area of x_axis
     y_expand: float, expand the cropping area of y_axis
     """
-
+    saved_dir = SEQ_DIR if continueous else PREPRO_DIR
     np.random.seed(0)
     assert dataset in subpath
 
@@ -68,7 +68,7 @@ def process(dataset, compression, num_frames, offset, x_expand, y_expand):
         video_name = video_name_ext.split('.')[0]
         video_path = os.path.join(path, video_name_ext)
 
-        if os.path.exists(os.path.join(PREPRO_DIR, subpath[dataset], compression, video_name)):
+        if os.path.exists(os.path.join(saved_dir, subpath[dataset], compression, video_name)):
             continue
 
         # extract frames from videos
@@ -78,10 +78,14 @@ def process(dataset, compression, num_frames, offset, x_expand, y_expand):
         if len(frames) <= 1:
             continue
 
-        # indices to random sample frame
-        sel_indices = np.random.choice(len(frames)-1, min(num_frames, len(frames)-1), replace=False)
+        
+        if not continueous: # indices to randomly sampled frames
+            sel_indices = np.random.choice(len(frames)-1, min(num_frames, len(frames)-1), replace=False)
+        else: # indices to first num_frame frames
+            sel_indices = np.arange(num_frames)
+
         for i, idx in enumerate(sel_indices):
-            saved_path = os.path.join(PREPRO_DIR, subpath[dataset], compression, video_name, str(idx))
+            saved_path = os.path.join(saved_dir, subpath[dataset], compression, video_name, str(idx))
 
             # face detection
             face_locations = fr.face_locations(frames[idx])
@@ -110,4 +114,5 @@ def process(dataset, compression, num_frames, offset, x_expand, y_expand):
 if __name__ == '__main__':
 
     for key, val in subpath.items():
-        process(key, 'c23', num_frames=20, offset=1, x_expand=1.5, y_expand=1.8)
+        process(key, 'c23', num_frames=50, offset=1, x_expand=1.5, y_expand=1.8, continueous=True)
+        process(key, 'c23', num_frames=20, offset=1, x_expand=1.5, y_expand=1.8, continueous=False)
