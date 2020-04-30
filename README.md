@@ -40,3 +40,23 @@ python3 crop_face.py
 python3 save_flow.py
 ```
 
+### Training
+- Train the CNN model on randomly sampled optical flow in the videos
+- Classifier: Vgg11 or Resnet18
+```
+python3 train.py -b <BATCH_SIZE> -e <EPOCH> -m <SAVED_MODEL_NAME> -l <MODEL_PATH> -n <NUM_DATA> -cpu
+    -b <BATCH_SIZE>
+        batch size used for training and validation
+    -e <EPOCH>
+        the number of epoch for training and validation
+    -m <SAVED_MODEL_NAME>
+        the model name (be saved in SAVED_MODEL_PATH)
+    -l <MODEL_PATH>
+        specified the model path if you want to load previous model
+    -n <NUM_DATA>
+        the number of data used for training. (set -1 if you want to use all the training data (85898))
+    -cpu
+        if you want to use CPU to train
+```
+
+
