@@ -5,7 +5,7 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from models.LSTM import eqModel
+from models.LSTM import SeqModel
 from models.resnet import resnet18
 from models.vgg import vgg11_bn
 from tb_writer import TensorboardWriter
