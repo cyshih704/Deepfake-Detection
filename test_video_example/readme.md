@@ -1,4 +1,4 @@
-# Test on single video
+# Test on a single video
 
 This is the code to test if a video is real, the training code can be found here https://github.com/ChingYenShih/Deepfake-Detection
 
