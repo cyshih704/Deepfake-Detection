@@ -15,3 +15,8 @@ pip3 install -r requirements.txt
  ```
  ./script.sh
  ```
+## Test
+To test if a video is real or fake
+```
+python3 test.py -i <path/to/video>
+```
