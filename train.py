@@ -5,10 +5,8 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from models import flownet_models
-from models.classifier import FlowClassifier
 from models.resnet import resnet18
-from models.vgg import vgg11_bn
+from models.vgg import vgg11_bn, vgg11
 from tb_writer import TensorboardWriter
 import os
 
@@ -20,8 +18,6 @@ parser.add_argument('-m', '--saved_model_name', type=str, default='model', help=
 parser.add_argument('-cpu', '--using_cpu', action='store_true', help='use cpu')
 parser.add_argument('-l', '--load_model', help='load model')
 parser.add_argument('-n', '--num_data', type=int, default=20000, help='the number of data used to train')
-parser.add_argument("--rgb_max", type=float, default = 255.)
-parser.add_argument('--fp16', action='store_true', help='Run model in pseudo-fp16 mode (fp16 storage fp32 math).')
 
 args = parser.parse_args()
 
@@ -47,11 +43,9 @@ def train_val(clf, criterion, optimizer, loader, epoch, device):
             clf.eval()
 
         for num_batch, (img, labels) in enumerate(pbar):
-            #first_img, second_img = first_img.to(device), second_img.to(device)
-            #farnback_img, flownet_img = farnback_img.to(device), flownet_img.to(device)
-            #farnback, flownet = farnback.to(device), flownet.to(device)
             img = img.to(device)
             labels = labels.to(device)
+
             if phase == 'train':
                 preds = clf(img)
             else:
@@ -79,8 +73,6 @@ def train_val(clf, criterion, optimizer, loader, epoch, device):
             else:
                 val_acc = total_correct/total_data*100
                 val_loss = total_loss/total_data
-
-            #_, pred_class = torch.max(preds, dim=1, keepdims=True)
 
 
             pbar.set_description('[{}] Epoch: {}; loss: {:.4f}, acc: {:.2f}%'.format(phase.upper(), epoch, total_loss/total_data,
@@ -120,22 +112,29 @@ class EarlyStop():
 
 
 def main():
-
+    # initialize tensorboard for visualization training progress
     tensorboard_path = 'runs/{}'.format(args.saved_model_name)
     tb_writer = TensorboardWriter(tensorboard_path)
 
+    # set the early stop
     early_stop = EarlyStop(patience=5, mode='max')
 
-
+    # get train and val dataloader
     train_loader = get_loader('train', batch_size=32, shuffle=True, num_data=-1)
     val_loader = get_loader('val', batch_size=32, shuffle=False, num_data=-1)
     loader = dict(train=train_loader, val=val_loader)
 
-    #clf = resnet18(pretrained=False, num_classes=1, in_channels=2).to(DEVICE)
-    clf = vgg11_bn(pretrained=False, num_classes=1).to(DEVICE)
+    # choose the classifier
+    clf = resnet18(pretrained=False, num_classes=1, in_channels=2).to(DEVICE)
+    #clf = vgg11_bn(pretrained=False, num_classes=1).to(DEVICE)
+    #clf = vgg11(pretrained=False, num_classes=1).to(DEVICE)
+
+    # set criterion and optimizer
     criterion = nn.BCELoss(reduction='mean')
     optimizer = optim.Adam(clf.parameters(), lr=1e-4)
 
+
+    # training
     for epoch in range(1, 100):
         train_loss, val_loss, train_acc, val_acc = train_val(clf, criterion, optimizer, loader, epoch, DEVICE)
         tb_writer.tensorboard_write(epoch, train_loss, val_loss, train_acc, val_acc)
@@ -143,7 +142,6 @@ def main():
         saved_model_path = os.path.join("saved_model", "{}".format(args.saved_model_name))
         if early_stop.stop(val_acc, clf, epoch, saved_model_path):
             break
-
 
     tb_writer.close()
 
