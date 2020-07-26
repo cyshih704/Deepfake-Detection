@@ -1,5 +1,23 @@
 # Deepfake-Detection
-This project explores and compares DeepFake detection efficacy to traditional dense optical flow technique known as Farneback optical flow as well as some of the recent deep learning-based optical flow estimators such as FlowNet, PWC-Net, and SPyNet. Besides, this repository compares the classification performance of pairwise optical flow-based networks to temporal networks employing RNN, LSTM, and Attention networks. The detail comparison is [here](https://github.com/ChingYenShih/Deepfake-Detection/blob/master/report/Deepfake-Detection.pdf)
+This repository explores DeepFake detection efficacy to optical flow on FaceForensics++ dataset, and compares traditional dense optical flow technique known as Farneback optical flow as well as some of the recent deep learning-based optical flow estimators such as FlowNet, PWC-Net, and SPyNet. Besides, this repository compares the classification performance of pairwise optical flow-based networks to temporal networks employing RNN, LSTM, and Attention networks. The detail comparison is [here](https://github.com/ChingYenShih/Deepfake-Detection/blob/master/report/Deepfake-Detection.pdf)
+
+
+## Results
+The experiment results show that VGG11bn can extract the best features on most types of the optical flow
+| CNN      | Farneback     | FlowNet2.0 | SPyNet   | PWC-Net  |
+| -------- | --------      | --------   | -------- | -------- |
+| ResNet18 | 68.90         | 62.26      | 72.79    | 61.21    |
+| VGG11    | 72.83         | 63.30      | 70.83    | **62.31**|
+| VGG11bn  | **78.87**     | **63.80**  | **77.05**| 62.01    |
+
+The experiment results show that self-attention model has best performance that other RNN models.
+| RNN            | Feature Extractor  | Train Acc.| Valid Acc. | Test Acc.    |
+| --------       | --------           | --------  | --------   | --------     |
+| LSTM           | ResNet18 w/o ft    | 84.65     | 88.57      | 87.50        |
+| BiLSTM         | ResNet18 w/o ft    | 81.94     | 88.21      | 87.50        |
+| LSTM           | VGG11bn w/o ft     | 96.87     | 97.50      | 95.36        |
+| LSTM           | VGG11bn w/ ft      | 93.75     | 95.00      | 96.07        |
+| Self-Attention | VGG11bn w/o ft     | 96.53     | 96.79      | **96.43**    |
 
 ## Data Preparation
 Get the download script [here](https://github.com/ondyari/FaceForensics)
