@@ -1,6 +1,5 @@
 # Deepfake-Detection
-Deepfake-Detection
-
+This project explores and compares DeepFake detection efficacy to traditional dense optical flow technique known as Farneback optical flow as well as some of the recent deep learning-based optical flow estimators such as FlowNet, PWC-Net, and SPyNet. Besides, this repository compares the classification performance of pairwise optical flow-based networks to temporal networks employing RNN, LSTM, and Attention networks. The detail comparison is [here](https://github.com/ChingYenShih/Deepfake-Detection/blob/master/report/Deepfake-Detection.pdf)
 
 ## Data Preparation
 Get the download script [here](https://github.com/ondyari/FaceForensics)
