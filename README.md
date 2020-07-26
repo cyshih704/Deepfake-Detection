@@ -10,7 +10,7 @@ Test accuracy for CNN-based models trained to classify single units of input as 
 | VGG11    | 72.83         | 63.30      | 70.83    | **62.31**|
 | VGG11bn  | **78.87**     | **63.80**  | **77.05**| 62.01    |
 
-ccuracies for models trained to classify sequences of 50 Farneback flow images as “real” or “fake”
+Accuracies for models trained to classify sequences of 50 Farneback flow images as “real” or “fake”
 | RNN            | Feature Extractor  | Train Acc.| Valid Acc. | Test Acc.    |
 | --------       | --------           | --------  | --------   | --------     |
 | LSTM           | ResNet18 w/o ft    | 84.65     | 88.57      | 87.50        |
