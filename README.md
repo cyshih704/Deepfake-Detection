@@ -3,14 +3,14 @@ This repository explores DeepFake detection efficacy to optical flow on FaceFore
 
 
 ## Results
-The experiment results show that VGG11bn can extract the best features on most types of the optical flow
+Test accuracy for CNN-based models trained to classify single units of input as “real” or “fake”.
 | CNN      | Farneback     | FlowNet2.0 | SPyNet   | PWC-Net  |
 | -------- | --------      | --------   | -------- | -------- |
 | ResNet18 | 68.90         | 62.26      | 72.79    | 61.21    |
 | VGG11    | 72.83         | 63.30      | 70.83    | **62.31**|
 | VGG11bn  | **78.87**     | **63.80**  | **77.05**| 62.01    |
 
-The experiment results show that self-attention model has best performance that other RNN models.
+ccuracies for models trained to classify sequences of 50 Farneback flow images as “real” or “fake”
 | RNN            | Feature Extractor  | Train Acc.| Valid Acc. | Test Acc.    |
 | --------       | --------           | --------  | --------   | --------     |
 | LSTM           | ResNet18 w/o ft    | 84.65     | 88.57      | 87.50        |
